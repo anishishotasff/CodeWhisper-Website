@@ -11,14 +11,14 @@ const platforms = [
     name: 'Windows',
     version: 'Windows 10 / 11',
     arch: '64-bit',
-    file: 'CodeWhisper Setup 1.0.1.exe',
+    file: 'CodeWhisper Setup 1.0.2.exe',
     size: '~85 MB',
     color: '#0078d4',
     glow: 'rgba(0,120,212,0.35)',
     badge: 'Most Popular',
     badgeColor: '#0078d4',
     extras: [
-      { label: 'Portable (.exe)', href: `${GITHUB_BASE}/CodeWhisper%201.0.1.exe` },
+      { label: 'Portable (.exe)', href: `${GITHUB_BASE}/CodeWhisper%201.0.2.exe` },
     ],
     features: ['One-click installer', 'Start menu shortcut', 'Windows 10 & 11', '64-bit'],
   },
@@ -28,7 +28,7 @@ const platforms = [
     name: 'macOS',
     version: 'macOS 11+',
     arch: 'Intel & Apple Silicon',
-    file: 'CodeWhisper-1.0.1.dmg',
+    file: 'CodeWhisper-1.0.2.dmg',
     size: '~90 MB',
     color: '#a855f7',
     glow: 'rgba(168,85,247,0.35)',
@@ -207,8 +207,8 @@ export default function Download() {
               {/* Main download button */}
               <motion.a
                 href={p.id === 'windows'
-                ? `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.1.exe`
-                : `${GITHUB_BASE}/CodeWhisper-1.0.1.dmg`
+                ? `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.2.exe`
+                : `${GITHUB_BASE}/CodeWhisper-1.0.2.dmg`
               }
                 target="_blank"
                 rel="noreferrer"

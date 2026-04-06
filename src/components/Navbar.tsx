@@ -10,14 +10,14 @@ const downloadOptions = [
     icon: '🖥',
     label: 'Windows',
     sub: 'Windows 10 / 11 · 64-bit · .exe',
-    href: `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.1.exe`,
+    href: `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.2.exe`,
     color: '#0078d4',
   },
   {
     icon: '🍎',
     label: 'macOS',
     sub: 'Intel & Apple Silicon · .dmg',
-    href: `${GITHUB_BASE}/CodeWhisper-1.0.1.dmg`,
+    href: `${GITHUB_BASE}/CodeWhisper-1.0.2.dmg`,
     color: '#a855f7',
   },
 ];
