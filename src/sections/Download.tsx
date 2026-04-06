@@ -294,14 +294,14 @@ export default function Download() {
             </motion.a>          </div>
 
           <div style={{ fontSize: 13, color: 'rgba(241,245,249,0.3)' }}>
-            🔓 Free & Open Source · MIT License ·{' '}
+            Free to use ·{' '}
             <a
               href="https://github.com/anishishotasff/CodeWhisper-Software"
               target="_blank"
               rel="noreferrer"
               style={{ color: '#a855f7', textDecoration: 'none' }}
             >
-              View source on GitHub
+              View on GitHub
             </a>
           </div>
         </motion.div>

@@ -72,7 +72,7 @@ export default function Pricing() {
             Free forever. <span className="gradient-text">No tricks.</span>
           </h2>
           <p style={{ fontSize: 18, color: 'rgba(241,245,249,0.55)', maxWidth: 480, margin: '0 auto' }}>
-            CodeWhisper is free and open source. AI features use your own API key — you pay OpenAI directly, or run Ollama locally for free.
+            CodeWhisper is free to use. AI features use your own API key — you pay OpenAI directly, or run Ollama locally for free.
           </p>
         </motion.div>
 
@@ -152,14 +152,14 @@ export default function Pricing() {
           ))}
         </div>
 
-        {/* Open source note */}
+        {/* GitHub note */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ delay: 0.5 }}
           style={{ textAlign: 'center', marginTop: 40, fontSize: 14, color: 'rgba(241,245,249,0.35)' }}
         >
-          🔓 Open source · MIT License ·{' '}
+          No credit card required · Cancel anytime ·{' '}
           <a href="https://github.com/anishishotasff/CodeWhisper-Software" target="_blank" rel="noreferrer"
             style={{ color: '#a855f7', textDecoration: 'none' }}>
             View on GitHub

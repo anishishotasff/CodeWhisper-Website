@@ -123,7 +123,7 @@ export default function Footer() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12,
         }}>
           <span style={{ fontSize: 13, color: 'rgba(241,245,249,0.3)' }}>
-            © 2024 CodeWhisper · MIT License · Free & Open Source · Built by{' '}
+            © 2025 CodeWhisper · Built by{' '}
             <motion.a
               href={GITHUB_PROFILE}
               target="_blank"

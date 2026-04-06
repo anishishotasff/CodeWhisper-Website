@@ -19,7 +19,7 @@ const story = [
   {
     icon: '🚀',
     title: 'What We Built',
-    text: 'CodeWhisper is a free, open-source desktop app that brings AI directly into your workflow. Open any project, ask anything, fix bugs automatically, and visualize your codebase — all offline if you want.',
+    text: 'CodeWhisper is a free desktop app that brings AI directly into your workflow. Open any project, ask anything, fix bugs automatically, and visualize your codebase — all offline if you want.',
   },
 ];
 
@@ -121,7 +121,7 @@ export default function Blog() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
             {[
               { icon: '🔒', title: 'Privacy first', desc: 'Run fully offline with Ollama. Your code never leaves your machine.' },
-              { icon: '🆓', title: 'Free forever', desc: 'No subscriptions, no paywalls. MIT licensed and open source.' },
+              { icon: '🆓', title: 'Free forever', desc: 'No subscriptions, no paywalls. Download and use it for free.' },
               { icon: '⚡', title: 'Instant answers', desc: 'Ask anything about your codebase and get answers in seconds.' },
               { icon: '🐛', title: 'Auto bug fix', desc: 'Detects and fixes errors automatically — not just highlights them.' },
               { icon: '🗺', title: 'Visual map', desc: 'See your entire project as an interactive graph of files and functions.' },
