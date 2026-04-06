@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const GITHUB_PROFILE = 'https://github.com/anishishotasff';
-const PORTFOLIO = 'https://anishishotasff.github.io'; // update this to your real portfolio URL
+const PORTFOLIO = 'http://anishishotasf.vercel.app/';
 
 export default function Footer() {
   return (
@@ -76,6 +76,7 @@ export default function Footer() {
                 { label: 'How it works', href: '#how-it-works' },
                 { label: 'Pricing', href: '#pricing' },
                 { label: 'Download', href: '#download' },
+                { label: 'Blog', href: '#blog' },
               ].map(l => (
                 <div key={l.label} style={{ marginBottom: 10 }}>
                   <motion.a
@@ -130,7 +131,7 @@ export default function Footer() {
               style={{ color: '#a855f7', textDecoration: 'none' }}
               whileHover={{ color: '#c084fc' }}
             >
-              @anishishotasff
+              Anish Debnath
             </motion.a>
           </span>
           <div style={{ display: 'flex', gap: 16 }}>

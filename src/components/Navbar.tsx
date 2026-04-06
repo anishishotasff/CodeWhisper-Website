@@ -32,7 +32,7 @@ const navLinks = [
   { label: 'Demo', href: '#demo' },
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Blog', href: 'https://github.com/anishishotasff', external: true },
+  { label: 'Blog', href: '#blog', external: false },
 ];
 
 export default function Navbar() {

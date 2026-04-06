@@ -6,6 +6,7 @@ import Demo from './sections/Demo';
 import HowItWorks from './sections/HowItWorks';
 import Pricing from './sections/Pricing';
 import Download from './sections/Download';
+import Blog from './sections/Blog';
 import Footer from './sections/Footer';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
       <HowItWorks />
       <Pricing />
       <Download />
+      <Blog />
       <Footer />
     </div>
   );
