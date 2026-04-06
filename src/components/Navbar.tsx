@@ -1,31 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const GITHUB_BASE = 'https://github.com/anishishotasff/CodeWhisper-Software/releases/latest/download';
-
-const links = ['Features', 'Demo', 'How it works', 'Pricing', 'Download'];
+const RELEASES = 'https://github.com/anishishotasff/CodeWhisper-Software/releases/latest';
 
 const downloadOptions = [
   {
     icon: '🖥',
     label: 'Windows',
     sub: 'Windows 10 / 11 · 64-bit · .exe',
-    href: `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.2.exe`,
+    href: RELEASES,
     color: '#0078d4',
   },
   {
     icon: '🍎',
     label: 'macOS',
     sub: 'Intel & Apple Silicon · .dmg',
-    href: `${GITHUB_BASE}/CodeWhisper-1.0.2.dmg`,
+    href: RELEASES,
     color: '#a855f7',
+  },
+  {
+    icon: '🐧',
+    label: 'Linux',
+    sub: 'AppImage · 64-bit',
+    href: RELEASES,
+    color: '#f97316',
   },
 ];
 
+const navLinks = [
+  { label: 'Features', href: '#features' },
+  { label: 'Demo', href: '#demo' },
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Pricing', href: '#pricing' },
+  { label: 'Blog', href: 'https://github.com/anishishotasff', external: true },
+];
+
 export default function Navbar() {
-  const [scrolled, setScrolled]     = useState(false);
-  const [dropOpen, setDropOpen]     = useState(false);
-  const dropRef                     = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
+  const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -33,7 +46,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
@@ -73,10 +85,12 @@ export default function Navbar() {
         </motion.a>
 
         {/* Nav links */}
-        {links.map(link => (
+        {navLinks.map(link => (
           <motion.a
-            key={link}
-            href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+            key={link.label}
+            href={link.href}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noreferrer' : undefined}
             style={{
               color: 'rgba(241,245,249,0.6)',
               textDecoration: 'none',
@@ -85,12 +99,35 @@ export default function Navbar() {
             }}
             whileHover={{ color: '#f1f5f9', backgroundColor: 'rgba(255,255,255,0.06)' }}
           >
-            {link}
+            {link.label}
           </motion.a>
         ))}
 
         {/* Spacer */}
         <div style={{ flex: 1 }} />
+
+        {/* GitHub profile link */}
+        <motion.a
+          href="https://github.com/anishishotasff"
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            color: 'rgba(241,245,249,0.55)',
+            textDecoration: 'none',
+            fontSize: 13, fontWeight: 500,
+            padding: '6px 12px', borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginRight: 4,
+          }}
+          whileHover={{ color: '#f1f5f9', borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.04)' }}
+          whileTap={{ scale: 0.96 }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </motion.a>
 
         {/* Download dropdown */}
         <div ref={dropRef} style={{ position: 'relative' }}>
@@ -118,7 +155,6 @@ export default function Navbar() {
             </motion.span>
           </motion.button>
 
-          {/* Dropdown menu */}
           <AnimatePresence>
             {dropOpen && (
               <motion.div
@@ -132,13 +168,12 @@ export default function Navbar() {
                   border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: 14,
                   overflow: 'hidden',
-                  minWidth: 240,
+                  minWidth: 260,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.2)',
                   backdropFilter: 'blur(20px)',
                   zIndex: 200,
                 }}
               >
-                {/* Header */}
                 <div style={{
                   padding: '10px 16px 8px',
                   fontSize: 11, fontWeight: 700, letterSpacing: 1,
@@ -149,7 +184,6 @@ export default function Navbar() {
                   Choose your platform
                 </div>
 
-                {/* Options */}
                 {downloadOptions.map((opt, i) => (
                   <motion.a
                     key={opt.label}
@@ -165,7 +199,6 @@ export default function Navbar() {
                     }}
                     whileHover={{ background: 'rgba(255,255,255,0.05)' }}
                   >
-                    {/* Platform icon */}
                     <div style={{
                       width: 40, height: 40, borderRadius: 10, flexShrink: 0,
                       background: `${opt.color}18`,
@@ -175,39 +208,24 @@ export default function Navbar() {
                     }}>
                       {opt.icon}
                     </div>
-
-                    {/* Text */}
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>
-                        {opt.label}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'rgba(241,245,249,0.4)', marginTop: 1 }}>
-                        {opt.sub}
-                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(241,245,249,0.4)', marginTop: 1 }}>{opt.sub}</div>
                     </div>
-
-                    {/* Arrow */}
                     <span style={{ fontSize: 14, color: opt.color }}>↓</span>
                   </motion.a>
                 ))}
 
-                {/* Footer */}
                 <div style={{
                   padding: '8px 16px 10px',
                   borderTop: '1px solid rgba(255,255,255,0.06)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 }}>
-                  <span style={{ fontSize: 11, color: 'rgba(241,245,249,0.3)' }}>
-                    🐧 Linux also available
-                  </span>
                   <motion.a
                     href="https://github.com/anishishotasff/CodeWhisper-Software/releases"
                     target="_blank"
                     rel="noreferrer"
-                    style={{
-                      fontSize: 11, color: '#a855f7',
-                      textDecoration: 'none', fontWeight: 600,
-                    }}
+                    style={{ fontSize: 11, color: '#a855f7', textDecoration: 'none', fontWeight: 600 }}
                     whileHover={{ color: '#c084fc' }}
                   >
                     All releases ↗

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
 
-const GITHUB_BASE = 'https://github.com/anishishotasff/CodeWhisper-Software/releases/latest/download';
+const RELEASES = 'https://github.com/anishishotasff/CodeWhisper-Software/releases/latest';
+const ALL_RELEASES = 'https://github.com/anishishotasff/CodeWhisper-Software/releases';
 
 const platforms = [
   {
@@ -17,8 +18,9 @@ const platforms = [
     glow: 'rgba(0,120,212,0.35)',
     badge: 'Most Popular',
     badgeColor: '#0078d4',
+    downloadHref: RELEASES,
     extras: [
-      { label: 'Portable (.exe)', href: `${GITHUB_BASE}/CodeWhisper%201.0.2.exe` },
+      { label: 'All releases ↗', href: ALL_RELEASES },
     ],
     features: ['One-click installer', 'Start menu shortcut', 'Windows 10 & 11', '64-bit'],
   },
@@ -34,8 +36,9 @@ const platforms = [
     glow: 'rgba(168,85,247,0.35)',
     badge: 'Universal',
     badgeColor: '#a855f7',
+    downloadHref: RELEASES,
     extras: [
-      { label: 'View all releases ↗', href: 'https://github.com/anishishotasff/CodeWhisper-Software/releases' },
+      { label: 'All releases ↗', href: ALL_RELEASES },
     ],
     features: ['Universal binary', 'Intel + Apple Silicon', 'macOS 11 Big Sur+', 'Dark mode native'],
   },
@@ -206,10 +209,7 @@ export default function Download() {
 
               {/* Main download button */}
               <motion.a
-                href={p.id === 'windows'
-                ? `${GITHUB_BASE}/CodeWhisper%20Setup%201.0.2.exe`
-                : `${GITHUB_BASE}/CodeWhisper-1.0.2.dmg`
-              }
+                href={p.downloadHref}
                 target="_blank"
                 rel="noreferrer"
                 style={{
@@ -291,8 +291,7 @@ export default function Download() {
               whileHover={{ background: 'rgba(255,255,255,0.14)' }}
             >
               View Releases ↗
-            </motion.a>
-          </div>
+            </motion.a>          </div>
 
           <div style={{ fontSize: 13, color: 'rgba(241,245,249,0.3)' }}>
             🔓 Free & Open Source · MIT License ·{' '}
