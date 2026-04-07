@@ -1,9 +1,7 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Replace these with your Firebase project config
-// Go to: https://console.firebase.google.com → New Project → Web App → Copy config
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || '',
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || '',
@@ -13,6 +11,11 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID || '',
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const firebaseReady = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+
+const app = firebaseReady
+  ? (getApps().length ? getApps()[0] : initializeApp(firebaseConfig))
+  : null;
+
+export const auth = app ? getAuth(app) : null as any;
+export const db = app ? getFirestore(app) : null as any;

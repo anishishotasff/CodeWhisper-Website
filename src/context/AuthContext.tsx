@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, firebaseReady } from '../firebase';
 
 export interface UserCredits {
   plan: 'free' | 'premium';
@@ -41,6 +41,7 @@ function getNextResetDate(): string {
 }
 
 async function initUserCredits(uid: string, plan: 'free' | 'premium' = 'free') {
+  if (!firebaseReady) return { plan, credits: 100, maxCredits: 100, resetDate: getNextResetDate() };
   const max = plan === 'premium' ? 1000 : 100;
   await setDoc(doc(db, 'users', uid), {
     plan,
@@ -53,18 +54,13 @@ async function initUserCredits(uid: string, plan: 'free' | 'premium' = 'free') {
 }
 
 async function getUserCredits(uid: string): Promise<UserCredits | null> {
+  if (!firebaseReady) return null;
   const snap = await getDoc(doc(db, 'users', uid));
   if (!snap.exists()) return null;
   const data = snap.data() as UserCredits;
-
-  // Auto-reset if past reset date
   if (new Date() > new Date(data.resetDate)) {
     const max = data.plan === 'premium' ? 1000 : 100;
-    const updated: UserCredits = {
-      ...data,
-      credits: max,
-      resetDate: getNextResetDate(),
-    };
+    const updated: UserCredits = { ...data, credits: max, resetDate: getNextResetDate() };
     await updateDoc(doc(db, 'users', uid), updated as any);
     return updated;
   }
@@ -77,12 +73,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshCredits = async () => {
-    if (!auth.currentUser) return;
+    if (!firebaseReady || !auth?.currentUser) return;
     const c = await getUserCredits(auth.currentUser.uid);
     setCredits(c);
   };
 
   useEffect(() => {
+    // If Firebase not configured, just mark as not loading
+    if (!firebaseReady || !auth) {
+      setLoading(false);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
@@ -98,15 +99,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signup = async (email: string, password: string) => {
+    if (!firebaseReady) throw new Error('Auth not configured yet');
     const { user: u } = await createUserWithEmailAndPassword(auth, email, password);
     await initUserCredits(u.uid);
   };
 
   const login = async (email: string, password: string) => {
+    if (!firebaseReady) throw new Error('Auth not configured yet');
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {
+    if (!firebaseReady) return;
     await signOut(auth);
   };
 
