@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
+import DownloadCounter from '../components/DownloadCounter';
 
 const RELEASES = 'https://github.com/anishishotasff/CodeWhisper-Software/releases/latest';
 const ALL_RELEASES = 'https://github.com/anishishotasff/CodeWhisper-Software/releases';
@@ -94,6 +95,9 @@ export default function Download() {
             Free forever. No account required. Works on Windows and macOS.
           </p>
         </motion.div>
+
+        {/* Download counter */}
+        <DownloadCounter />
 
         {/* Download cards */}
         <div style={{
