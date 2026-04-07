@@ -1,118 +1,131 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function CustomCursor() {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
+  const [pos, setPos] = useState({ x: -200, y: -200 });
   const [clicked, setClicked] = useState(false);
   const [hovered, setHovered] = useState(false);
-
-  // Smooth spring follow
-  const springX = useSpring(cursorX, { stiffness: 500, damping: 40 });
-  const springY = useSpring(cursorY, { stiffness: 500, damping: 40 });
-
-  // Slower trailing glow
-  const glowX = useSpring(cursorX, { stiffness: 80, damping: 20 });
-  const glowY = useSpring(cursorY, { stiffness: 80, damping: 20 });
+  const posRef = useRef({ x: -200, y: -200 });
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
+      posRef.current = { x: e.clientX, y: e.clientY };
     };
-
     const down = () => setClicked(true);
     const up = () => setClicked(false);
-
-    const checkHover = (e: MouseEvent) => {
+    const hover = (e: MouseEvent) => {
       const el = e.target as HTMLElement;
-      const isInteractive = el.closest('a, button, [role="button"]');
-      setHovered(!!isInteractive);
+      setHovered(!!el.closest('a, button, [role="button"]'));
     };
 
+    // Smooth follow via RAF
+    const loop = () => {
+      setPos(prev => ({
+        x: prev.x + (posRef.current.x - prev.x) * 0.18,
+        y: prev.y + (posRef.current.y - prev.y) * 0.18,
+      }));
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+
     window.addEventListener('mousemove', move);
-    window.addEventListener('mousemove', checkHover);
+    window.addEventListener('mousemove', hover);
     window.addEventListener('mousedown', down);
     window.addEventListener('mouseup', up);
-
     return () => {
+      cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', move);
-      window.removeEventListener('mousemove', checkHover);
+      window.removeEventListener('mousemove', hover);
       window.removeEventListener('mousedown', down);
       window.removeEventListener('mouseup', up);
     };
-  }, [cursorX, cursorY]);
+  }, []);
+
+  const scale = clicked ? 0.82 : hovered ? 1.18 : 1;
 
   return (
     <>
-      {/* Hide default cursor via style tag */}
-      <style>{`* { cursor: none !important; }`}</style>
+      <style>{`
+        * { cursor: none !important; }
 
-      {/* Trailing glow blob */}
-      <motion.div
+        @keyframes rainbowRotate {
+          0%   { filter: hue-rotate(0deg)   drop-shadow(0 0 6px rgba(255,100,0,0.9)); }
+          25%  { filter: hue-rotate(90deg)  drop-shadow(0 0 8px rgba(0,255,100,0.9)); }
+          50%  { filter: hue-rotate(180deg) drop-shadow(0 0 8px rgba(0,100,255,0.9)); }
+          75%  { filter: hue-rotate(270deg) drop-shadow(0 0 8px rgba(200,0,255,0.9)); }
+          100% { filter: hue-rotate(360deg) drop-shadow(0 0 6px rgba(255,100,0,0.9)); }
+        }
+
+        .rainbow-cursor {
+          animation: rainbowRotate 1.6s linear infinite;
+        }
+      `}</style>
+
+      {/* Trailing glow */}
+      <div
         style={{
           position: 'fixed',
-          left: glowX,
-          top: glowY,
-          x: '-50%',
-          y: '-50%',
-          width: hovered ? 180 : 120,
-          height: hovered ? 180 : 120,
+          left: pos.x,
+          top: pos.y,
+          transform: 'translate(-50%, -50%)',
+          width: hovered ? 160 : 100,
+          height: hovered ? 160 : 100,
           borderRadius: '50%',
-          background: hovered
-            ? 'radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)',
           pointerEvents: 'none',
-          zIndex: 9998,
-          transition: 'width 0.3s, height 0.3s, background 0.3s',
+          zIndex: 9997,
+          transition: 'width 0.3s, height 0.3s',
         }}
       />
 
-      {/* Outer ring */}
-      <motion.div
-        animate={{
-          width: clicked ? 20 : hovered ? 44 : 32,
-          height: clicked ? 20 : hovered ? 44 : 32,
-          borderColor: hovered ? 'rgba(168,85,247,0.9)' : 'rgba(124,58,237,0.6)',
-          borderWidth: hovered ? 2 : 1.5,
-          boxShadow: hovered ? '0 0 16px rgba(168,85,247,0.4)' : '0 0 8px rgba(124,58,237,0.2)',
-        }}
-        transition={{ duration: 0.15 }}
+      {/* Rainbow cursor SVG */}
+      <div
+        ref={cursorRef}
         style={{
           position: 'fixed',
-          left: springX,
-          top: springY,
-          x: '-50%',
-          y: '-50%',
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          border: '1.5px solid rgba(124,58,237,0.6)',
+          left: pos.x,
+          top: pos.y,
           pointerEvents: 'none',
           zIndex: 9999,
+          transform: `translate(0, 0) scale(${scale})`,
+          transition: 'transform 0.12s ease',
+          transformOrigin: '0 0',
         }}
-      />
+      >
+        <svg
+          className="rainbow-cursor"
+          width="32"
+          height="38"
+          viewBox="0 0 32 38"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ display: 'block' }}
+        >
+          <defs>
+            <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="#ff0000" />
+              <stop offset="16%"  stopColor="#ff8800" />
+              <stop offset="33%"  stopColor="#ffff00" />
+              <stop offset="50%"  stopColor="#00ff00" />
+              <stop offset="66%"  stopColor="#0088ff" />
+              <stop offset="83%"  stopColor="#8800ff" />
+              <stop offset="100%" stopColor="#ff00ff" />
+            </linearGradient>
+          </defs>
 
-      {/* Inner dot */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          left: springX,
-          top: springY,
-          x: '-50%',
-          y: '-50%',
-          pointerEvents: 'none',
-          zIndex: 10000,
-          borderRadius: '50%',
-          background: hovered ? '#c084fc' : '#a855f7',
-          boxShadow: hovered ? '0 0 10px #a855f7' : '0 0 6px rgba(168,85,247,0.6)',
-        }}
-        animate={{
-          width: clicked ? 3 : hovered ? 6 : 5,
-          height: clicked ? 3 : hovered ? 6 : 5,
-        }}
-        transition={{ duration: 0.1 }}
-      />
+          {/* Dark fill — cursor arrow shape */}
+          <path
+            d="M2 2 L2 30 L9 23 L14 34 L18 32 L13 21 L22 21 Z"
+            fill="rgba(10,10,15,0.92)"
+            stroke="url(#rainbowGrad)"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
     </>
   );
 }
