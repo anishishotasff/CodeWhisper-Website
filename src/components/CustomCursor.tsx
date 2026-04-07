@@ -70,20 +70,12 @@ export default function CustomCursor() {
 
       {/* Outer ring */}
       <motion.div
-        style={{
-          position: 'fixed',
-          left: springX,
-          top: springY,
-          x: '-50%',
-          y: '-50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-        }}
         animate={{
           width: clicked ? 20 : hovered ? 44 : 32,
           height: clicked ? 20 : hovered ? 44 : 32,
           borderColor: hovered ? 'rgba(168,85,247,0.9)' : 'rgba(124,58,237,0.6)',
           borderWidth: hovered ? 2 : 1.5,
+          boxShadow: hovered ? '0 0 16px rgba(168,85,247,0.4)' : '0 0 8px rgba(124,58,237,0.2)',
         }}
         transition={{ duration: 0.15 }}
         style={{
@@ -98,7 +90,6 @@ export default function CustomCursor() {
           border: '1.5px solid rgba(124,58,237,0.6)',
           pointerEvents: 'none',
           zIndex: 9999,
-          boxShadow: hovered ? '0 0 16px rgba(168,85,247,0.4)' : '0 0 8px rgba(124,58,237,0.2)',
         }}
       />
 
