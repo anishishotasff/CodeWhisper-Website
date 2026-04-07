@@ -1,4 +1,6 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import CustomCursor from './components/CustomCursor';
 import MouseGradient from './components/MouseGradient';
@@ -12,8 +14,11 @@ import Blog from './sections/Blog';
 import FAQ from './sections/FAQ';
 import Roadmap from './sections/Roadmap';
 import Footer from './sections/Footer';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Dashboard from './pages/Dashboard';
 
-export default function App() {
+function HomePage() {
   return (
     <>
       <CustomCursor />
@@ -32,5 +37,20 @@ export default function App() {
         <Footer />
       </div>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
