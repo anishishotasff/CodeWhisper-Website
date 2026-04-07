@@ -10,6 +10,7 @@ async function fetchTotalDownloads(): Promise<number> {
     );
     if (!res.ok) return 0;
     const releases = await res.json();
+    if (!Array.isArray(releases) || releases.length === 0) return 0;
     let total = 0;
     for (const release of releases) {
       for (const asset of release.assets || []) {
@@ -103,10 +104,14 @@ export default function DownloadCounter() {
             letterSpacing: '-1px', lineHeight: 1,
             fontVariantNumeric: 'tabular-nums',
           }}>
-            {displayTotal.toLocaleString()}
+            {totalDownloads === 0 ? (
+              <span style={{ fontSize: 16, color: 'rgba(241,245,249,0.5)' }}>Loading...</span>
+            ) : (
+              displayTotal.toLocaleString()
+            )}
           </div>
           <div style={{ fontSize: 12, color: 'rgba(241,245,249,0.4)', marginTop: 3 }}>
-            Total downloads
+            {totalDownloads === 0 ? 'Fetching from GitHub...' : 'Total downloads'}
           </div>
         </div>
       </motion.div>
