@@ -78,6 +78,7 @@ export default function Footer() {
                 { label: 'Download', href: '#download' },
                 { label: 'Blog', href: '#blog' },
                 { label: 'FAQ', href: '#faq' },
+                { label: 'Roadmap', href: '#roadmap' },
               ].map(l => (
                 <div key={l.label} style={{ marginBottom: 10 }}>
                   <motion.a

@@ -10,6 +10,7 @@ import Pricing from './sections/Pricing';
 import Download from './sections/Download';
 import Blog from './sections/Blog';
 import FAQ from './sections/FAQ';
+import Roadmap from './sections/Roadmap';
 import Footer from './sections/Footer';
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
         <Download />
         <Blog />
         <FAQ />
+        <Roadmap />
         <Footer />
       </div>
     </>
