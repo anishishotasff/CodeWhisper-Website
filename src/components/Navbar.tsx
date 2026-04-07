@@ -33,6 +33,7 @@ const navLinks = [
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Blog', href: '#blog', external: false },
+  { label: 'FAQ', href: '#faq', external: false },
 ];
 
 export default function Navbar() {

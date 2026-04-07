@@ -9,6 +9,7 @@ import HowItWorks from './sections/HowItWorks';
 import Pricing from './sections/Pricing';
 import Download from './sections/Download';
 import Blog from './sections/Blog';
+import FAQ from './sections/FAQ';
 import Footer from './sections/Footer';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
         <Pricing />
         <Download />
         <Blog />
+        <FAQ />
         <Footer />
       </div>
     </>
