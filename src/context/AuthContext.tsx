@@ -5,6 +5,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, firebaseReady } from '../firebase';
@@ -22,6 +24,7 @@ interface AuthContextType {
   loading: boolean;
   signup: (email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   refreshCredits: () => Promise<void>;
 }
@@ -109,13 +112,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
+  const loginWithGoogle = async () => {
+    if (!firebaseReady) throw new Error('Auth not configured yet');
+    const provider = new GoogleAuthProvider();
+    const { user: u } = await signInWithPopup(auth, provider);
+    // Init credits if new user
+    const existing = await getUserCredits(u.uid);
+    if (!existing) await initUserCredits(u.uid);
+  };
+
   const logout = async () => {
     if (!firebaseReady) return;
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, credits, loading, signup, login, logout, refreshCredits }}>
+    <AuthContext.Provider value={{ user, credits, loading, signup, login, loginWithGoogle, logout, refreshCredits }}>
       {children}
     </AuthContext.Provider>
   );
