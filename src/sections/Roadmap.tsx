@@ -23,11 +23,11 @@ const milestones = [
   },
   {
     version: 'v2',
-    label: 'Coming Soon',
+    label: 'Live',
     title: 'AI Project Builder',
-    status: 'next',
-    color: '#7c3aed',
-    glow: 'rgba(124,58,237,0.3)',
+    status: 'live',
+    color: '#10b981',
+    glow: 'rgba(16,185,129,0.3)',
     icon: '🔨',
     items: [
       'Generate full projects from a prompt',
