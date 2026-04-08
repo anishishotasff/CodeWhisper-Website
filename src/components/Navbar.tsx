@@ -44,6 +44,7 @@ export default function Navbar() {
   const [dropOpen, setDropOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  // Need user.photoURL and user.displayName for avatar
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -117,15 +118,30 @@ export default function Navbar() {
             <Link
               to="/dashboard"
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 8,
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '5px 12px 5px 5px', borderRadius: 100,
                 background: 'rgba(124,58,237,0.1)',
                 border: '1px solid rgba(124,58,237,0.25)',
-                color: '#a855f7', textDecoration: 'none',
-                fontSize: 13, fontWeight: 600, marginRight: 4,
+                textDecoration: 'none',
+                marginRight: 4,
               }}
             >
-              ⚡ Dashboard
+              {/* Avatar */}
+              <div style={{
+                width: 26, height: 26, borderRadius: '50%',
+                background: user.photoURL ? 'transparent' : 'linear-gradient(135deg, #7c3aed, #06b6d4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 900, color: '#fff',
+                overflow: 'hidden', flexShrink: 0,
+              }}>
+                {user.photoURL
+                  ? <img src={user.photoURL} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : (user.email || '?')[0].toUpperCase()
+                }
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#a855f7' }}>
+                {user.displayName?.split(' ')[0] || 'Profile'}
+              </span>
             </Link>
           </motion.div>
         ) : (

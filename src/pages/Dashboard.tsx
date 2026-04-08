@@ -17,8 +17,9 @@ export default function Dashboard() {
   const pct = Math.round((credits.credits / credits.maxCredits) * 100);
   const resetDate = new Date(credits.resetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const isPremium = credits.plan === 'premium';
-
   const barColor = pct > 50 ? '#10b981' : pct > 20 ? '#f59e0b' : '#ef4444';
+  const avatar = user.photoURL || null;
+  const initials = (user.displayName || user.email || '?')[0].toUpperCase();
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', padding: '24px' }}>
@@ -53,12 +54,28 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ marginBottom: 32 }}
+          style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 20 }}
         >
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.5px', marginBottom: 4 }}>
-            Welcome back 👋
-          </h1>
-          <p style={{ fontSize: 14, color: 'rgba(241,245,249,0.4)' }}>{user.email}</p>
+          {/* Avatar */}
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%', flexShrink: 0,
+            background: avatar ? 'transparent' : 'linear-gradient(135deg, #7c3aed, #06b6d4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 26, fontWeight: 900, color: '#fff',
+            overflow: 'hidden',
+            boxShadow: '0 0 24px rgba(124,58,237,0.3)',
+          }}>
+            {avatar
+              ? <img src={avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : initials
+            }
+          </div>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.5px', marginBottom: 4 }}>
+              {user.displayName || 'Welcome back'} 👋
+            </h1>
+            <p style={{ fontSize: 13, color: 'rgba(241,245,249,0.4)' }}>{user.email}</p>
+          </div>
         </motion.div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
