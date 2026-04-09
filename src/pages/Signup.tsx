@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { auth, firebaseReady } from '../firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import PhoneInput from '../components/PhoneInput';
 
 declare global { interface Window { recaptchaVerifierSignup: any; } }
@@ -27,20 +25,11 @@ export default function Signup() {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [confirmResult, setConfirmResult] = useState<ConfirmationResult | null>(null);
+  const [confirmResult, setConfirmResult] = useState<any>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    return () => {
-      if (window.recaptchaVerifierSignup) {
-        window.recaptchaVerifierSignup.clear();
-        window.recaptchaVerifierSignup = null;
-      }
-    };
-  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('');
@@ -54,25 +43,38 @@ export default function Signup() {
 
   const handleSendOtp = async () => {
     if (!phone.trim()) { setError('Enter a phone number'); return; }
-    if (!firebaseReady) { setError('Firebase not configured'); return; }
     setError(''); setLoading(true);
     try {
-      if (!window.recaptchaVerifierSignup) {
-        window.recaptchaVerifierSignup = new RecaptchaVerifier(auth, 'recaptcha-signup-container', { size: 'invisible', callback: () => {} });
-      }
-      const result = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
-      setConfirmResult(result); setOtpSent(true);
+      const { getRecaptchaToken } = await import('../utils/recaptcha');
+      const recaptchaToken = await getRecaptchaToken('SIGNUP_OTP');
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const res = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${FIREBASE_API_KEY}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phoneNumber: phone, recaptchaToken }) }
+      );
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      setConfirmResult({ sessionInfo: data.sessionInfo });
+      setOtpSent(true);
     } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Failed to send OTP');
-      if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+      setError(err.message || 'Failed to send OTP');
     } finally { setLoading(false); }
   };
 
   const handleVerifyOtp = async () => {
     if (!otp.trim() || !confirmResult) return;
     setError(''); setLoading(true);
-    try { await confirmResult.confirm(otp); navigate('/dashboard'); }
-    catch { setError('Invalid OTP. Please try again.'); }
+    try {
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const res = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${FIREBASE_API_KEY}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionInfo: confirmResult.sessionInfo, code: otp }) }
+      );
+      const data = await res.json();
+      if (data.error) throw new Error('Invalid OTP. Please try again.');
+      navigate('/dashboard');
+    }
+    catch (err: any) { setError(err.message || 'Invalid OTP. Please try again.'); }
     finally { setLoading(false); }
   };
 
