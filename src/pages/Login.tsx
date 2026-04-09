@@ -53,7 +53,7 @@ export default function Login() {
       const recaptchaToken = await getRecaptchaToken('SEND_OTP');
 
       // Use Firebase REST API with reCAPTCHA Enterprise token
-      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDCLy3OsHumYzudICGjP6iffv5UIYQFWAI';
       const res = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${FIREBASE_API_KEY}`,
         {
@@ -75,7 +75,7 @@ export default function Login() {
     if (!otp.trim() || !confirmResult) return;
     setError(''); setLoading(true);
     try {
-      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDCLy3OsHumYzudICGjP6iffv5UIYQFWAI';
       const sessionInfo = (confirmResult as any).sessionInfo;
       const res = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${FIREBASE_API_KEY}`,
@@ -204,3 +204,4 @@ export default function Login() {
     </div>
   );
 }
+

@@ -47,7 +47,7 @@ export default function Signup() {
     try {
       const { getRecaptchaToken } = await import('../utils/recaptcha');
       const recaptchaToken = await getRecaptchaToken('SIGNUP_OTP');
-      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDCLy3OsHumYzudICGjP6iffv5UIYQFWAI';
       const res = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${FIREBASE_API_KEY}`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phoneNumber: phone, recaptchaToken }) }
@@ -65,7 +65,7 @@ export default function Signup() {
     if (!otp.trim() || !confirmResult) return;
     setError(''); setLoading(true);
     try {
-      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyAUM5eXoSob0rQQ3J8_kLTZNlAIdqu0OLI';
+      const FIREBASE_API_KEY = process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDCLy3OsHumYzudICGjP6iffv5UIYQFWAI';
       const res = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${FIREBASE_API_KEY}`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionInfo: confirmResult.sessionInfo, code: otp }) }
@@ -201,3 +201,4 @@ export default function Signup() {
     </div>
   );
 }
+
