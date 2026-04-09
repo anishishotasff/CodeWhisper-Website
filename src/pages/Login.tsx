@@ -3,11 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth, firebaseReady } from '../firebase';
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
-} from 'firebase/auth';
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+import PhoneInput from '../components/PhoneInput';
 
 declare global { interface Window { recaptchaVerifier: any; } }
 
@@ -138,8 +135,7 @@ export default function Login() {
             <motion.div key="phone" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }}>
               {!otpSent ? (
                 <>
-                  <div style={{ fontSize: 12, color: 'rgba(241,245,249,0.5)', marginBottom: 8 }}>Enter with country code (e.g. +91 9876543210)</div>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 9876543210" style={inputStyle} />
+                  <PhoneInput value={phone} onChange={setPhone} />
                   {error && <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#f87171' }}>{error}</div>}
                   <motion.button onClick={handleSendOtp} disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', color: '#fff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', opacity: loading ? 0.7 : 1, boxShadow: '0 0 30px rgba(124,58,237,0.4)' }}
                     whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.98 } : {}}
