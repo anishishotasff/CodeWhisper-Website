@@ -1,181 +1,182 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { auth, firebaseReady } from '../firebase';
+import {
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+} from 'firebase/auth';
+
+declare global { interface Window { recaptchaVerifier: any; } }
+
+type Mode = 'email' | 'phone';
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '11px 14px', borderRadius: 10,
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  color: '#f1f5f9', fontSize: 14, outline: 'none',
+  boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: 14,
+};
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<Mode>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [confirmResult, setConfirmResult] = useState<ConfirmationResult | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const recaptchaRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setError(''); setLoading(true);
     try {
       await login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
+  };
+
+  const handleSendOtp = async () => {
+    if (!phone.trim()) { setError('Enter a phone number'); return; }
+    if (!firebaseReady) { setError('Firebase not configured'); return; }
+    setError(''); setLoading(true);
+    try {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {},
+        });
+      }
+      const result = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+      setConfirmResult(result);
+      setOtpSent(true);
+    } catch (err: any) {
+      setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Failed to send OTP');
+      if (window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+    } finally { setLoading(false); }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp.trim() || !confirmResult) return;
+    setError(''); setLoading(true);
+    try {
+      await confirmResult.confirm(otp);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError('Invalid OTP. Please try again.');
+    } finally { setLoading(false); }
   };
 
   const handleGoogle = async () => {
-    setError('');
-    setGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Google sign-in failed');
-    } finally {
-      setGoogleLoading(false);
-    }
+    setError(''); setGoogleLoading(true);
+    try { await loginWithGoogle(); navigate('/dashboard'); }
+    catch (err: any) { setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Google sign-in failed'); }
+    finally { setGoogleLoading(false); }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#0a0a0f', padding: '24px',
-    }}>
-      {/* Background glow */}
-      <div style={{
-        position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%,-50%)',
-        width: 600, height: 400,
-        background: 'radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', padding: '24px' }}>
+      <div style={{ position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div id="recaptcha-container" ref={recaptchaRef} />
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          width: '100%', maxWidth: 420,
-          background: 'rgba(15,15,26,0.9)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 24, padding: '40px 36px',
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.4)',
-          position: 'relative', overflow: 'hidden',
-        }}
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+        style={{ width: '100%', maxWidth: 420, background: 'rgba(15,15,26,0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '40px 36px', backdropFilter: 'blur(20px)', boxShadow: '0 40px 80px rgba(0,0,0,0.4)', position: 'relative', overflow: 'hidden' }}
       >
-        {/* Top accent */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
-        }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }} />
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🪄</div>
           <div style={{ fontSize: 22, fontWeight: 900, color: '#f1f5f9', letterSpacing: '-0.5px' }}>
             Code<span style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Whisper</span>
           </div>
-          <div style={{ fontSize: 14, color: 'rgba(241,245,249,0.4)', marginTop: 6 }}>
-            Sign in to your account
-          </div>
+          <div style={{ fontSize: 14, color: 'rgba(241,245,249,0.4)', marginTop: 6 }}>Sign in to your account</div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'rgba(241,245,249,0.6)', display: 'block', marginBottom: 6 }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              style={{
-                width: '100%', padding: '11px 14px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#f1f5f9', fontSize: 14, outline: 'none',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
+        {/* Mode tabs */}
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, marginBottom: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
+          {(['email', 'phone'] as Mode[]).map(m => (
+            <button key={m} onClick={() => { setMode(m); setError(''); setOtpSent(false); }}
+              style={{ flex: 1, padding: '7px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s', background: mode === m ? 'rgba(124,58,237,0.25)' : 'transparent', color: mode === m ? '#a855f7' : 'rgba(241,245,249,0.4)' }}
+            >
+              {m === 'email' ? '✉️ Email' : '📱 Phone'}
+            </button>
+          ))}
+        </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'rgba(241,245,249,0.6)', display: 'block', marginBottom: 6 }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              style={{
-                width: '100%', padding: '11px 14px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#f1f5f9', fontSize: 14, outline: 'none',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-
-          {error && (
-            <div style={{
-              marginBottom: 16, padding: '10px 14px', borderRadius: 8,
-              background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
-              fontSize: 13, color: '#f87171',
-            }}>
-              {error}
-            </div>
+        <AnimatePresence mode="wait">
+          {mode === 'email' ? (
+            <motion.form key="email" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} onSubmit={handleEmailSubmit}>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" style={inputStyle} />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" style={{ ...inputStyle, marginBottom: 0 }} />
+              {error && <div style={{ margin: '12px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#f87171' }}>{error}</div>}
+              <motion.button type="submit" disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', color: '#fff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', opacity: loading ? 0.7 : 1, boxShadow: '0 0 30px rgba(124,58,237,0.4)', marginTop: 14 }}
+                whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.98 } : {}}
+              >{loading ? 'Signing in...' : 'Sign In'}</motion.button>
+            </motion.form>
+          ) : (
+            <motion.div key="phone" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }}>
+              {!otpSent ? (
+                <>
+                  <div style={{ fontSize: 12, color: 'rgba(241,245,249,0.5)', marginBottom: 8 }}>Enter with country code (e.g. +91 9876543210)</div>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 9876543210" style={inputStyle} />
+                  {error && <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#f87171' }}>{error}</div>}
+                  <motion.button onClick={handleSendOtp} disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', color: '#fff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', opacity: loading ? 0.7 : 1, boxShadow: '0 0 30px rgba(124,58,237,0.4)' }}
+                    whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.98 } : {}}
+                  >{loading ? 'Sending OTP...' : 'Send OTP'}</motion.button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, color: 'rgba(241,245,249,0.6)', marginBottom: 12, textAlign: 'center' }}>
+                    📱 OTP sent to <strong style={{ color: '#f1f5f9' }}>{phone}</strong>
+                    <button onClick={() => { setOtpSent(false); setOtp(''); }} style={{ background: 'none', border: 'none', color: '#a855f7', cursor: 'pointer', fontSize: 12, marginLeft: 8 }}>Change</button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                    {[0,1,2,3,4,5].map(i => (
+                      <input key={i} type="text" maxLength={1} value={otp[i] || ''} onChange={e => { const v = e.target.value.replace(/\D/g,''); const arr = otp.split(''); arr[i] = v; setOtp(arr.join('').slice(0,6)); if (v && i < 5) { const next = document.getElementById(`otp-${i+1}`); next?.focus(); } }} id={`otp-${i}`}
+                        style={{ flex: 1, padding: '12px 0', textAlign: 'center', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: `1px solid ${otp[i] ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.1)'}`, color: '#f1f5f9', fontSize: 18, fontWeight: 700, outline: 'none' }}
+                      />
+                    ))}
+                  </div>
+                  {error && <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', fontSize: 13, color: '#f87171' }}>{error}</div>}
+                  <motion.button onClick={handleVerifyOtp} disabled={loading || otp.length < 6} style={{ width: '100%', padding: '13px', borderRadius: 12, background: otp.length === 6 ? 'linear-gradient(135deg, #7c3aed, #06b6d4)' : 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', cursor: otp.length < 6 ? 'not-allowed' : 'pointer', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', opacity: loading ? 0.7 : 1 }}
+                    whileHover={otp.length === 6 && !loading ? { scale: 1.02 } : {}} whileTap={otp.length === 6 && !loading ? { scale: 0.98 } : {}}
+                  >{loading ? 'Verifying...' : 'Verify OTP'}</motion.button>
+                </>
+              )}
+            </motion.div>
           )}
+        </AnimatePresence>
 
-          <motion.button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%', padding: '13px', borderRadius: 12,
-              background: 'linear-gradient(135deg, #7c3aed, #06b6d4)',
-              color: '#fff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
-              opacity: loading ? 0.7 : 1,
-              boxShadow: '0 0 30px rgba(124,58,237,0.4)',
-            }}
-            whileHover={!loading ? { scale: 1.02, boxShadow: '0 0 40px rgba(124,58,237,0.6)' } : {}}
-            whileTap={!loading ? { scale: 0.98 } : {}}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </motion.button>
-        </form>
-
-        {/* Divider */}
+        {/* Divider + Google */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
           <span style={{ fontSize: 12, color: 'rgba(241,245,249,0.3)' }}>or</span>
           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
         </div>
-
-        {/* Google sign-in */}
-        <motion.button
-          onClick={handleGoogle}
-          disabled={googleLoading}
-          style={{
-            width: '100%', padding: '12px', borderRadius: 12,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: '#f1f5f9', cursor: googleLoading ? 'not-allowed' : 'pointer',
-            fontSize: 14, fontWeight: 600, fontFamily: 'inherit',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            opacity: googleLoading ? 0.7 : 1,
-          }}
-          whileHover={!googleLoading ? { background: 'rgba(255,255,255,0.1)', scale: 1.02 } : {}}
-          whileTap={!googleLoading ? { scale: 0.98 } : {}}
+        <motion.button onClick={handleGoogle} disabled={googleLoading}
+          style={{ width: '100%', padding: '12px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#f1f5f9', cursor: googleLoading ? 'not-allowed' : 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: googleLoading ? 0.7 : 1 }}
+          whileHover={!googleLoading ? { background: 'rgba(255,255,255,0.1)', scale: 1.02 } : {}} whileTap={!googleLoading ? { scale: 0.98 } : {}}
         >
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -186,17 +187,12 @@ export default function Login() {
           {googleLoading ? 'Signing in...' : 'Continue with Google'}
         </motion.button>
 
-        <div style={{ textAlign: 'center', marginTop: 24, fontSize: 14, color: 'rgba(241,245,249,0.4)' }}>
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'rgba(241,245,249,0.4)' }}>
           Don't have an account?{' '}
-          <Link to="/signup" style={{ color: '#a855f7', textDecoration: 'none', fontWeight: 600 }}>
-            Sign up free
-          </Link>
+          <Link to="/signup" style={{ color: '#a855f7', textDecoration: 'none', fontWeight: 600 }}>Sign up free</Link>
         </div>
-
-        <div style={{ textAlign: 'center', marginTop: 12 }}>
-          <Link to="/" style={{ fontSize: 13, color: 'rgba(241,245,249,0.3)', textDecoration: 'none' }}>
-            ← Back to home
-          </Link>
+        <div style={{ textAlign: 'center', marginTop: 10 }}>
+          <Link to="/" style={{ fontSize: 13, color: 'rgba(241,245,249,0.3)', textDecoration: 'none' }}>← Back to home</Link>
         </div>
       </motion.div>
     </div>
