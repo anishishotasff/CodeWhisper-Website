@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const CREDIT_COSTS = { CHAT: 1, BUG_SCAN: 1, BUG_FIX: 2, REWRITE: 3, ANALYZE: 5 };
 const SECTIONS = ['Overview', 'Credits', 'Settings', 'Shortcuts'];
@@ -68,7 +69,7 @@ export default function Dashboard() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <span style={{ fontSize: 20 }}>🪄</span>
+            <Logo size={28} id="dash" />
             <span style={{ fontSize: 16, fontWeight: 800, color: '#f1f5f9' }}>
               Code<span style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Whisper</span>
             </span>

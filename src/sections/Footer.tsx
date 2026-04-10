@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import Logo from '../components/Logo';
+
 const GITHUB_PROFILE = 'https://github.com/anishishotasff';
 const PORTFOLIO = 'http://anishishotasf.vercel.app/';
 
@@ -17,7 +19,7 @@ export default function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 280 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <span style={{ fontSize: 22 }}>🪄</span>
+              <Logo size={28} id="footer" />
               <span style={{ fontSize: 18, fontWeight: 800, color: '#f1f5f9' }}>
                 Code<span className="gradient-text">Whisper</span>
               </span>
