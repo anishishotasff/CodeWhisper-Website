@@ -34,7 +34,18 @@ export default function Signup() {
   const handleGoogle = async () => {
     setError(''); setGoogleLoading(true);
     try { await loginWithGoogle(); navigate('/dashboard'); }
-    catch (err: any) { setError(err.message?.replace('Firebase: ', '').replace(/\(auth.*\)/, '') || 'Google sign-in failed'); }
+    catch (err: any) {
+      const msg = err.message || '';
+      if (msg.includes('unauthorized-domain')) {
+        setError('Domain not authorized. Add your Vercel URL to Firebase authorized domains.');
+      } else if (msg.includes('popup-closed')) {
+        setError('Sign-in popup was closed. Please try again.');
+      } else if (msg.includes('network')) {
+        setError('Network error. Check your connection.');
+      } else {
+        setError(msg.replace('Firebase: ', '').replace(/\(auth.*\)\.?/, '').trim() || 'Google sign-in failed. Try email/password instead.');
+      }
+    }
     finally { setGoogleLoading(false); }
   };
 

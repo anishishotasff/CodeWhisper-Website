@@ -115,10 +115,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async () => {
     if (!firebaseReady) throw new Error('Auth not configured yet');
     const provider = new GoogleAuthProvider();
-    const { user: u } = await signInWithPopup(auth, provider);
-    // Init credits if new user
-    const existing = await getUserCredits(u.uid);
-    if (!existing) await initUserCredits(u.uid);
+    try {
+      const { user: u } = await signInWithPopup(auth, provider);
+      const existing = await getUserCredits(u.uid);
+      if (!existing) await initUserCredits(u.uid);
+    } catch (err: any) {
+      // Re-throw with clean message
+      const msg = err.message || '';
+      if (msg.includes('unauthorized-domain')) {
+        throw new Error('This domain is not authorized. Please add it to Firebase authorized domains.');
+      }
+      throw err;
+    }
   };
 
   const logout = async () => {
