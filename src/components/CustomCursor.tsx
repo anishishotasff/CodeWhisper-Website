@@ -20,11 +20,11 @@ export default function CustomCursor() {
       setHovered(!!el.closest('a, button, [role="button"]'));
     };
 
-    // Smooth follow via RAF
+    // Smooth follow via RAF — 0.35 = fast, snappy
     const loop = () => {
       setPos(prev => ({
-        x: prev.x + (posRef.current.x - prev.x) * 0.18,
-        y: prev.y + (posRef.current.y - prev.y) * 0.18,
+        x: prev.x + (posRef.current.x - prev.x) * 0.35,
+        y: prev.y + (posRef.current.y - prev.y) * 0.35,
       }));
       rafRef.current = requestAnimationFrame(loop);
     };
